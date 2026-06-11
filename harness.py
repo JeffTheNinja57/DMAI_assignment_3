@@ -46,12 +46,19 @@ class EvaluationHarness:
 
     def __init__(self, scenario="A", seconds_per_eval=None, repeats=1,
                  record_history=True):
+        if scenario not in _SECONDS_PER_EVAL_BY_SCENARIO:
+            raise ValueError(
+                f"unknown scenario {scenario!r}, expected one of "
+                f"{sorted(_SECONDS_PER_EVAL_BY_SCENARIO)}")
         self.scenario = scenario
         if seconds_per_eval is None:
-            seconds_per_eval = _SECONDS_PER_EVAL_BY_SCENARIO.get(scenario, 0.0)
+            seconds_per_eval = _SECONDS_PER_EVAL_BY_SCENARIO[scenario]
         self.seconds_per_eval = float(seconds_per_eval)
-        # How many noisy samples to average per objective1 call. >1 trades budget
-        # for a less noisy estimate (each repeat still counts as one evaluation).
+        # How many noisy samples to average per objective1 call. Averaging r
+        # samples gives a less noisy estimate but costs r evaluations against the
+        # budget, so it is a genuine trade-off rather than a free lunch.
+        if int(repeats) < 1:
+            raise ValueError("repeats must be >= 1")
         self.repeats = int(repeats)
         self.record_history = record_history
 
