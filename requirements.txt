@@ -1,0 +1,10 @@
+# Needed to run the given objectives and the framework.
+numpy
+scipy
+xgboost
+matplotlib
+
+# The optimizer library (task 2) additionally uses:
+#   optuna      # Bayesian optimisation (TPE)
+#   cma         # CMA-ES
+#   pymoo       # NSGA-II
