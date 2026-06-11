@@ -103,6 +103,9 @@ def run_experiment(algorithm, scenario="A", n_runs=5, seeds=None, name=None,
     seeds : sequence of int, optional
         Seeds to use; defaults to ``range(n_runs)`` so runs are paired across
         algorithms.
+    name : str, optional
+        Label for the algorithm in tables and plots; defaults to the algorithm
+        function's ``__name__``.
     harness_kwargs : dict, optional
         Extra keyword arguments forwarded to ``EvaluationHarness`` (e.g.
         ``{"repeats": 3}`` to average the noisy objective).
