@@ -3,8 +3,12 @@ numpy
 scipy
 xgboost
 matplotlib
+pandas
 
 # The optimizer library (task 2) additionally uses:
-#   optuna      # Bayesian optimisation (TPE)
-#   cma         # CMA-ES
-#   pymoo       # NSGA-II
+optuna      # Bayesian optimisation (TPE)
+cma         # CMA-ES
+pymoo       # NSGA-II
+
+# macOS: also run `brew install libomp` for XGBoost to load.
+# Recommended: conda create -n dmai_a3 python=3.11 && pip install -r requirements.txt
