@@ -31,7 +31,17 @@ def compare(result_a, result_b, metric="best", paired=True,
     a = np.asarray(_values(result_a, metric), dtype=float)
     b = np.asarray(_values(result_b, metric), dtype=float)
 
-    if paired and len(a) == len(b):
+    # A non-finite best value means a run never produced a usable solution (for
+    # example no feasible layout in Scenario B). Feeding that into the tests
+    # would give a meaningless p-value, so fail loudly instead of hiding it.
+    if not (np.all(np.isfinite(a)) and np.all(np.isfinite(b))):
+        raise ValueError(
+            f"non-finite {metric} value(s) in "
+            f"{result_a.algorithm_name!r} or {result_b.algorithm_name!r}; "
+            "a run likely found no usable (feasible) solution")
+
+    is_paired = paired and len(a) == len(b)
+    if is_paired:
         diff = a - b
         if np.allclose(diff, 0.0):
             # Wilcoxon is undefined when every difference is zero.
@@ -44,8 +54,15 @@ def compare(result_a, result_b, metric="best", paired=True,
         stat, p = mannwhitneyu(a, b, alternative=alternative)
 
     median_a, median_b = float(np.median(a)), float(np.median(b))
-    better = result_a.algorithm_name if median_a < median_b else result_b.algorithm_name
-    if median_a == median_b:
+    # Direction of effect. For paired runs use the median of the per-seed
+    # differences, which is what the signed-rank test actually looks at; for
+    # unpaired runs fall back to comparing the two medians.
+    center = float(np.median(a - b)) if is_paired else median_a - median_b
+    if center < 0:
+        better = result_a.algorithm_name
+    elif center > 0:
+        better = result_b.algorithm_name
+    else:
         better = "tie"
 
     return {
