@@ -16,7 +16,9 @@ cma_es            — CMA-ES (Hansen 2016), a state-of-the-art evolutionary
                     strategy that adapts the covariance of its sampling
                     distribution; goes beyond the course material
 nsga2             — NSGA-II (Deb et al. 2002), the reference multi-objective
-                    evolutionary algorithm via pymoo; goes beyond the course
+                    evolutionary algorithm via pymoo
+SMS-EMOA          - Beyond the course
+
 
 References
 ----------
@@ -302,19 +304,9 @@ def cma_es_constrained(harness, seed=None, budget=500, sigma0=0.3):
 def nsga2(harness, seed=None, budget=500, pop_size=50):
     """NSGA-II for Scenario C (multi-objective optimisation).
 
-    NSGA-II (Deb et al. 2002) is the reference algorithm for multi-objective
+    NSGA-II (Deb et al. 2002) is the algorithm for multi-objective
     evolutionary optimisation. It uses non-dominated sorting and crowding
     distance to maintain a diverse set of Pareto-optimal solutions.
-
-    Adaptation
-    ----------
-    * We wrap the two harness objectives in a pymoo Problem so the MO logging
-      (needed for the Pareto plot) happens inside the harness as required.
-    * Population size and number of generations are derived from the budget:
-        n_gen = budget // pop_size
-    * pymoo's RandomSampling + SimulatedBinaryCrossover + PolynomialMutation
-      are kept at their defaults — these are well-proven for continuous
-      problems in [0, 1]^d.
 
     References
     ----------
@@ -363,6 +355,68 @@ def nsga2(harness, seed=None, budget=500, pop_size=50):
             problem,
             algorithm,
             ("n_gen", n_gen),
+            seed=seed,
+            verbose=False,
+        )
+    return None
+
+
+def smsemoa(harness, seed=None, budget=500, pop_size=50):
+    """SMS-EMOA for Scenario C (multi-objective optimisation, beyond-course).
+
+
+    Adaptation
+    ----------
+    * Same harness-wrapped pymoo Problem as nsga2 so every evaluation is logged.
+    * Termination is set on the number of evaluations (n_eval), so the run
+      respects the same evaluation budget as the other algorithms.
+
+    References
+    ----------
+    Beume, N., Naujoks, B., & Emmerich, M. (2007). SMS-EMOA: Multiobjective
+        selection based on dominated hypervolume. European Journal of
+        Operational Research, 181(3), 1653-1669.
+    """
+    from pymoo.algorithms.moo.sms import SMSEMOA
+    from pymoo.core.problem import Problem
+    from pymoo.optimize import minimize
+    from pymoo.operators.sampling.rnd import FloatRandomSampling
+    from pymoo.operators.crossover.sbx import SBX
+    from pymoo.operators.mutation.pm import PM
+
+    class WindFarmProblem(Problem):
+        def __init__(self):
+            super().__init__(
+                n_var=harness.dim,
+                n_obj=2,
+                n_ieq_constr=0,
+                xl=harness.lower,
+                xu=harness.upper,
+            )
+
+        def _evaluate(self, X, out, *_, **__):
+            f1s, f2s = [], []
+            for x in X:
+                f1, f2 = harness.evaluate_multi(x)
+                f1s.append(f1)
+                f2s.append(f2)
+            out["F"] = np.column_stack([f1s, f2s])
+
+    problem = WindFarmProblem()
+    algorithm = SMSEMOA(
+        pop_size=pop_size,
+        sampling=FloatRandomSampling(),
+        crossover=SBX(prob=0.9, eta=15),
+        mutation=PM(prob=1.0 / harness.dim, eta=20),
+        eliminate_duplicates=True,
+    )
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        minimize(
+            problem,
+            algorithm,
+            ("n_eval", budget),     # cap evaluations so the budget matches the others
             seed=seed,
             verbose=False,
         )
