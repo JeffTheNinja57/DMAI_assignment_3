@@ -41,10 +41,11 @@ SCENARIO = 'A'
 # We use 590 to leave a safe margin for real algorithm overhead (wall time
 # + eval_time must both fit inside 5 hours).
 BUDGET_A = 590
+OUTDIR = "outputs_A"
 
 
 def main():
-    os.makedirs('outputs_A', exist_ok=True)
+    os.makedirs('OUTDIR', exist_ok=True)
     
     print('Framework and algorithms loaded OK')
     print(f'Running {N_RUNS} runs x 3 algorithms x up to {BUDGET_A} evals each...')
@@ -90,7 +91,7 @@ def main():
     plotting.plot_convergence(results_A, ax=ax, energy=True)
     ax.set_title('Scenario A: Convergence (mean ± std, 5 runs each)')
     fig.tight_layout()
-    fig.savefig(os.path.join('outputs_A', 'convergence_A.png'), dpi=150)
+    fig.savefig(os.path.join('OUTDIR', 'convergence_A.png'), dpi=150)
     print('Saved outputs_A/convergence_A.png')
 
     # Statistical Tests - Wilcoxon Signed-Rank on best solutions
@@ -123,7 +124,7 @@ def main():
     plotting.plot_layout(best_run.best_x, ax=ax2, energy=energy_gwh,
                          title=f'Best layout — {best_alg_name} ({energy_gwh:.2f} GWh)')
     fig2.tight_layout()
-    fig2.savefig(os.path.join('outputs_A', 'best_layout_A.png'), dpi=150)
+    fig2.savefig(os.path.join('OUTDIR', 'best_layout_A.png'), dpi=150)
     print('Saved outputs_A/best_layout_A.png')
 
     # Computation time analysis
@@ -154,7 +155,7 @@ def main():
     axes[1].tick_params(axis='x', rotation=15)
 
     fig3.tight_layout()
-    fig3.savefig(os.path.join('outputs_A', 'timing_A.png'), dpi=150)
+    fig3.savefig(os.path.join('OUTDIR', 'timing_A.png'), dpi=150)
     print('Saved outputs_A/timing_A.png')
 
 

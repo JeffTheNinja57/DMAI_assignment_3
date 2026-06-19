@@ -50,7 +50,7 @@ N_RUNS = 12             # well above the required minimum of 5. More runs are ne
                         # runs are essentially free.
 DENOISE_REPEATS = 50    # re-evaluations of the best layout for an honest energy value
 GLOBAL_SEED = 0         # best-effort reproducibility (the surrogate is still noisy)
-OUTDIR = "scenario_b_outputs"
+OUTDIR = "outputs_B"
 
 # (algorithm function, label used in tables and plots)
 ALGORITHMS = [
