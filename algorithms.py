@@ -361,6 +361,10 @@ def nsga2(harness, seed=None, budget=500, pop_size=50):
     return None
 
 
+# ---------------------------------------------------------------------------
+# 5. SMS-EMOA - Population Based Evolutionary Algorithm
+# ---------------------------------------------------------------------------
+
 def smsemoa(harness, seed=None, budget=500, pop_size=50):
     """SMS-EMOA for Scenario C (multi-objective optimisation, beyond-course).
 
